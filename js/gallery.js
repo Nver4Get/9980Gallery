@@ -6,51 +6,91 @@ const lightboxImage = document.getElementById("lightbox-image");
 const previousButton = document.getElementById("lightbox-prev");
 const nextButton = document.getElementById("lightbox-next");
 
+const themeToggle = document.getElementById("theme-toggle");
+const categoryFilter = document.getElementById("category-filter");
+
 let currentIndex = 0;
+let visibleImages = [];
+
 let touchStartX = 0;
 let touchEndX = 0;
 
+
+function updateVisibleImages() {
+  visibleImages = Array.from(galleryImages).filter((image) => {
+    return image.style.display !== "none";
+  });
+}
+
+
 function showImage(index) {
+  updateVisibleImages();
+
+  if (visibleImages.length === 0) {
+    return;
+  }
+
   currentIndex = index;
-  lightboxImage.src = galleryImages[currentIndex].src;
+
+  if (currentIndex < 0) {
+    currentIndex = visibleImages.length - 1;
+  }
+
+  if (currentIndex >= visibleImages.length) {
+    currentIndex = 0;
+  }
+
+  lightboxImage.src = visibleImages[currentIndex].src;
+
   lightbox.classList.add("active");
 }
 
-galleryImages.forEach((image, index) => {
+
+galleryImages.forEach((image) => {
   image.addEventListener("click", () => {
-    showImage(index);
+    updateVisibleImages();
+
+    showImage(visibleImages.indexOf(image));
   });
 });
+
 
 previousButton.addEventListener("click", (event) => {
   event.stopPropagation();
 
+  updateVisibleImages();
+
   currentIndex--;
 
   if (currentIndex < 0) {
-    currentIndex = galleryImages.length - 1;
+    currentIndex = visibleImages.length - 1;
   }
 
   showImage(currentIndex);
 });
 
+
 nextButton.addEventListener("click", (event) => {
   event.stopPropagation();
 
+  updateVisibleImages();
+
   currentIndex++;
 
-  if (currentIndex >= galleryImages.length) {
+  if (currentIndex >= visibleImages.length) {
     currentIndex = 0;
   }
 
   showImage(currentIndex);
 });
 
+
 lightbox.addEventListener("click", (event) => {
   if (event.target === lightbox) {
     lightbox.classList.remove("active");
   }
 });
+
 
 document.addEventListener("keydown", (event) => {
   if (!lightbox.classList.contains("active")) {
@@ -70,6 +110,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+
 lightbox.addEventListener(
   "touchstart",
   (event) => {
@@ -78,16 +119,18 @@ lightbox.addEventListener(
   { passive: true },
 );
 
+
 lightbox.addEventListener(
   "touchend",
   (event) => {
     touchEndX = event.changedTouches[0].screenX;
+
     const swipeDistance = touchEndX - touchStartX;
 
-    // Abaikan gerakan yang terlalu pendek
     if (Math.abs(swipeDistance) < 50) {
       return;
     }
+
     if (swipeDistance < 0) {
       nextButton.click();
     } else {
@@ -97,7 +140,6 @@ lightbox.addEventListener(
   { passive: true },
 );
 
-const themeToggle = document.getElementById("theme-toggle");
 
 if (themeToggle) {
   const savedTheme = localStorage.getItem("theme");
@@ -120,21 +162,29 @@ if (themeToggle) {
   });
 }
 
-const categoryFilter = document.getElementById("category-filter");
 
-categoryFilter.addEventListener("change", () => {
-  const selectedCategory = categoryFilter.value;
+if (categoryFilter) {
+  categoryFilter.addEventListener("change", () => {
+    const selectedCategory = categoryFilter.value;
 
-  galleryImages.forEach((image) => {
-    const imageCategory = image.dataset.category;
+    galleryImages.forEach((image) => {
+      const imageCategory = image.dataset.category;
 
-    if (
-      selectedCategory === "all" ||
-      imageCategory === selectedCategory
-    ) {
-      image.style.display = "block";
-    } else {
-      image.style.display = "none";
-    }
+      if (
+        selectedCategory === "all" ||
+        imageCategory === selectedCategory
+      ) {
+        image.style.display = "block";
+      } else {
+        image.style.display = "none";
+      }
+    });
+
+    updateVisibleImages();
+
+    lightbox.classList.remove("active");
   });
-});
+}
+
+
+updateVisibleImages();
