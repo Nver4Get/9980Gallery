@@ -15,16 +15,25 @@ let visibleImages = [];
 let touchStartX = 0;
 let touchEndX = 0;
 
-
 function updateVisibleImages() {
   visibleImages = Array.from(galleryImages).filter((image) => {
     return image.style.display !== "none";
   });
 }
 
+function updateNavigationButtons() {
+  if (visibleImages.length <= 1) {
+    previousButton.style.display = "none";
+    nextButton.style.display = "none";
+  } else {
+    previousButton.style.display = "";
+    nextButton.style.display = "";
+  }
+}
 
 function showImage(index) {
   updateVisibleImages();
+  updateNavigationButtons();
 
   if (visibleImages.length === 0) {
     return;
@@ -41,10 +50,8 @@ function showImage(index) {
   }
 
   lightboxImage.src = visibleImages[currentIndex].src;
-
   lightbox.classList.add("active");
 }
-
 
 galleryImages.forEach((image) => {
   image.addEventListener("click", () => {
@@ -53,7 +60,6 @@ galleryImages.forEach((image) => {
     showImage(visibleImages.indexOf(image));
   });
 });
-
 
 previousButton.addEventListener("click", (event) => {
   event.stopPropagation();
@@ -69,7 +75,6 @@ previousButton.addEventListener("click", (event) => {
   showImage(currentIndex);
 });
 
-
 nextButton.addEventListener("click", (event) => {
   event.stopPropagation();
 
@@ -84,13 +89,11 @@ nextButton.addEventListener("click", (event) => {
   showImage(currentIndex);
 });
 
-
 lightbox.addEventListener("click", (event) => {
   if (event.target === lightbox) {
     lightbox.classList.remove("active");
   }
 });
-
 
 document.addEventListener("keydown", (event) => {
   if (!lightbox.classList.contains("active")) {
@@ -110,7 +113,6 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-
 lightbox.addEventListener(
   "touchstart",
   (event) => {
@@ -118,7 +120,6 @@ lightbox.addEventListener(
   },
   { passive: true },
 );
-
 
 lightbox.addEventListener(
   "touchend",
@@ -139,7 +140,6 @@ lightbox.addEventListener(
   },
   { passive: true },
 );
-
 
 if (themeToggle) {
   const savedTheme = localStorage.getItem("theme");
@@ -162,7 +162,6 @@ if (themeToggle) {
   });
 }
 
-
 if (categoryFilter) {
   categoryFilter.addEventListener("change", () => {
     const selectedCategory = categoryFilter.value;
@@ -170,10 +169,7 @@ if (categoryFilter) {
     galleryImages.forEach((image) => {
       const imageCategory = image.dataset.category;
 
-      if (
-        selectedCategory === "all" ||
-        imageCategory === selectedCategory
-      ) {
+      if (selectedCategory === "all" || imageCategory === selectedCategory) {
         image.style.display = "block";
       } else {
         image.style.display = "none";
@@ -181,10 +177,10 @@ if (categoryFilter) {
     });
 
     updateVisibleImages();
+    updateNavigationButtons();
 
     lightbox.classList.remove("active");
   });
 }
-
 
 updateVisibleImages();
