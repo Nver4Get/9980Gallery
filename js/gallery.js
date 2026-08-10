@@ -119,3 +119,22 @@ if (themeToggle) {
     }
   });
 }
+
+const categoryFilter = document.getElementById("category-filter");
+
+categoryFilter.addEventListener("change", () => {
+  const selectedCategory = categoryFilter.value;
+
+  galleryImages.forEach((image) => {
+    const imageCategory = image.dataset.category;
+
+    if (
+      selectedCategory === "all" ||
+      imageCategory === selectedCategory
+    ) {
+      image.style.display = "block";
+    } else {
+      image.style.display = "none";
+    }
+  });
+});
